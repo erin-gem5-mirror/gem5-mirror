@@ -272,6 +272,9 @@ class Decode
     /** Fetch to decode delay. */
     Cycles fetchToDecodeDelay;
 
+    /** Decode to fetch delay (for early unblock calculation). */
+    Cycles decodeToFetchDelay;
+
     /** The width of decode, in instructions. */
     unsigned decodeWidth;
 

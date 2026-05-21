@@ -97,6 +97,7 @@ IEW::IEW(CPU *_cpu, const BaseO3CPUParams &params)
       commitToIEWDelay(params.commitToIEWDelay),
       renameToIEWDelay(params.renameToIEWDelay),
       issueToExecuteDelay(params.issueToExecuteDelay),
+      iewToRenameDelay(params.iewToRenameDelay),
       dispatchWidth(params.dispatchWidth),
       issueWidth(params.issueWidth),
       wbNumInst(0),
@@ -558,13 +559,23 @@ IEW::unblock(ThreadID tid)
     DPRINTF(IEW, "[tid:%i] Reading instructions out of the skid "
             "buffer %u.\n",tid, tid);
 
-    // If the skid bufffer is empty, signal back to previous stages to unblock.
-    // Also switch status to running.
-    if (skidBuffer[tid].empty()) {
+    // Send unblock when skid buffer can be drained within iewToRenameDelay
+    // cycles. This compensates for signal propagation delay so rename can
+    // resume without a bubble. Only transition to Running when truly empty.
+    unsigned earlyThreshold = iewToRenameDelay * dispatchWidth;
+    if (skidBuffer[tid].size() <= earlyThreshold) {
         toRename->iewUnblock[tid] = true;
         wroteToTimeBuffer = true;
-        DPRINTF(IEW, "[tid:%i] Done unblocking.\n",tid);
-        dispatchStatus[tid] = Running;
+
+        if (skidBuffer[tid].empty()) {
+            DPRINTF(IEW, "[tid:%i] Done unblocking.\n", tid);
+            dispatchStatus[tid] = Running;
+            return;
+        }
+        DPRINTF(IEW,
+                "[tid:%i] Early unblock signal (skid size %u <= "
+                "threshold %u), staying in Unblocking.\n",
+                tid, skidBuffer[tid].size(), earlyThreshold);
     }
 }
 
