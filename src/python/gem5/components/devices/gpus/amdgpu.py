@@ -404,8 +404,12 @@ class MI355X(MI300X):
             "if [ -f /home/gem5/load_amdgpu.sh ]; then\n"
             # Last stable support
             "    sh /home/gem5/load_amdgpu.sh\n"
+            "elif [ ! -f /lib/modules/`uname -r`/updates/dkms/amdgpu.ko ]; then\n"
+            '    echo "ERROR: Missing DKMS package for kernel `uname -r`. Exiting gem5."\n'
+            "    sleep 60\n"
+            "    /sbin/m5 exit\n"
             "else\n"
-            # develop support
+            '   echo "I am in ROCM 6: overriding the ip_block_mask value"\n'
             f"    modprobe -v amdgpu ip_block_mask=0x6f ppfeaturemask=0 dpm=0 audio=0 ras_enable=0 discovery={self._discovery_value}\n"
             "fi\n"
         )
