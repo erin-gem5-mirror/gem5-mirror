@@ -59,7 +59,7 @@ jobs:
                   # If current time is 7pm then run the workflow.
                   if [[ $HOUR  == '19' ]]
                   then
-                    gh workflow run daily-tests.yal --ref github-agentic-workflow >/dev/null
+                    gh workflow run daily-tests.yml --ref github-agentic-workflow >/dev/null
                     echo "Daily test scheduled to run on github-agentic-workflow branch."
                   else
                     echo "Daily tests not scheduled."
@@ -94,6 +94,10 @@ jobs:
                   else
                     echo "Compiler tests not scheduled."
                   fi
+
+            - name: Install gh-aw extension
+              run: gh extension install github/gh-aw
+
             - name: Weekly Repo Status
               env:
                   DAY: ${{ steps.timedate-recorder.outputs.DAY }}
