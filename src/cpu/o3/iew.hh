@@ -390,6 +390,9 @@ class IEW
      */
     Cycles issueToExecuteDelay;
 
+    /** IEW to rename delay (for early unblock calculation). */
+    Cycles iewToRenameDelay;
+
     /** Width of dispatch, in instructions. */
     unsigned dispatchWidth;
 

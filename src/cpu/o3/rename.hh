@@ -441,6 +441,9 @@ class Rename
     /** Delay between commit and rename, in ticks. */
     unsigned commitToRenameDelay;
 
+    /** Rename to decode delay (for early unblock calculation). */
+    Cycles renameToDecodeDelay;
+
     /** Rename width, in instructions. */
     unsigned renameWidth;
 

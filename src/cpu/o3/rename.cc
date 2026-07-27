@@ -84,6 +84,7 @@ Rename::Rename(CPU *_cpu, const BaseO3CPUParams &params)
       iewToRenameDelay(params.iewToRenameDelay),
       decodeToRenameDelay(params.decodeToRenameDelay),
       commitToRenameDelay(params.commitToRenameDelay),
+      renameToDecodeDelay(params.renameToDecodeDelay),
       renameWidth(params.renameWidth),
       numThreads(params.numThreads),
       stats(_cpu)
@@ -930,16 +931,25 @@ Rename::unblock(ThreadID tid)
 {
     DPRINTF(Rename, "[tid:%i] Trying to unblock.\n", tid);
 
-    // Rename is done unblocking if the skid buffer is empty.
-    if (skidBuffer[tid].empty() && renameStatus[tid] != SerializeStall) {
-
-        DPRINTF(Rename, "[tid:%i] Done unblocking.\n", tid);
+    // Send unblock when skid buffer can be drained within renameToDecodeDelay
+    // cycles. This compensates for signal propagation delay so decode can
+    // resume without a bubble. Only transition to Running when truly empty.
+    unsigned earlyThreshold = renameToDecodeDelay * renameWidth;
+    if (skidBuffer[tid].size() <= earlyThreshold &&
+        renameStatus[tid] != SerializeStall) {
 
         toDecode->renameUnblock[tid] = true;
         wroteToTimeBuffer = true;
 
-        renameStatus[tid] = Running;
-        return true;
+        if (skidBuffer[tid].empty()) {
+            DPRINTF(Rename, "[tid:%i] Done unblocking.\n", tid);
+            renameStatus[tid] = Running;
+            return true;
+        }
+        DPRINTF(Rename,
+                "[tid:%i] Early unblock signal (skid size %u <= "
+                "threshold %u), staying in Unblocking.\n",
+                tid, skidBuffer[tid].size(), earlyThreshold);
     }
 
     return false;
@@ -1285,7 +1295,6 @@ Rename::readStallSignals(ThreadID tid)
     }
 
     if (fromIEW->iewUnblock[tid]) {
-        assert(stalls[tid].iew);
         stalls[tid].iew = false;
     }
 }

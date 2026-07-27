@@ -97,6 +97,7 @@ Decode::Decode(CPU *_cpu, const BaseO3CPUParams &params)
       iewToDecodeDelay(params.iewToDecodeDelay),
       commitToDecodeDelay(params.commitToDecodeDelay),
       fetchToDecodeDelay(params.fetchToDecodeDelay),
+      decodeToFetchDelay(params.decodeToFetchDelay),
       decodeWidth(params.decodeWidth),
       numThreads(params.numThreads),
       stats(_cpu)
@@ -302,17 +303,24 @@ Decode::block(ThreadID tid)
 bool
 Decode::unblock(ThreadID tid)
 {
-    // Decode is done unblocking only if the skid buffer is empty.
-    if (skidBuffer[tid].empty()) {
-        DPRINTF(Decode, "[tid:%i] Done unblocking.\n", tid);
+    // Send unblock when skid buffer can be drained within decodeToFetchDelay
+    // cycles. This compensates for signal propagation delay so fetch can
+    // resume without a bubble. Only transition to Running when truly empty.
+    unsigned earlyThreshold = decodeToFetchDelay * decodeWidth;
+    if (skidBuffer[tid].size() <= earlyThreshold) {
         toFetch->decodeUnblock[tid] = true;
         wroteToTimeBuffer = true;
 
-        decodeStatus[tid] = Running;
-        return true;
+        if (skidBuffer[tid].empty()) {
+            DPRINTF(Decode, "[tid:%i] Done unblocking.\n", tid);
+            decodeStatus[tid] = Running;
+            return true;
+        }
+        DPRINTF(Decode,
+                "[tid:%i] Early unblock signal (skid size %u <= "
+                "threshold %u), staying in Unblocking.\n",
+                tid, skidBuffer[tid].size(), earlyThreshold);
     }
-
-    DPRINTF(Decode, "[tid:%i] Currently unblocking.\n", tid);
 
     return false;
 }
@@ -507,7 +515,6 @@ Decode::readStallSignals(ThreadID tid)
     }
 
     if (fromRename->renameUnblock[tid]) {
-        assert(stalls[tid].rename);
         stalls[tid].rename = false;
     }
 }
