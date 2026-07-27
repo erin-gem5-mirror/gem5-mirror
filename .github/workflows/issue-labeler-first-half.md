@@ -45,7 +45,7 @@ The following is the issue number of the issue that you should analyze:
 
 Issue number: ${{ github.event.inputs.issue_number }}
 
-Get the contents of the issue in this repository with this issue number, then analyze the title and body of the opened issue.
+Get the contents of the issue with this issue number in the current repository, then analyze the title and body of the opened issue.
 
 Add zero or more of the allowed labels: `arch`, `arch-arm`, `arch-gcn3`, `arch-mips`, `arch-power`, `arch-riscv`, `arch-sparc`, `arch-vega`, `arch-x86`, `base`, `base-stats`, `bug`, `build error`, `classic caches`, `compilation error`, `configs`, `cpu`, `cpu base`, `cpu-kvm`, `cpu-minor`, `cpu-o3`, `cpu-simple`, `dependencies`, `dev`, `dev-arm`, `dev-hsa`, `dev-virtio`, `doc`, `dram`, `duplicate`, `enhancement`, `ext`.
 

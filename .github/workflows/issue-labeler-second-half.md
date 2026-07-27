@@ -45,7 +45,7 @@ The following is the issue number of the issue that you should analyze:
 
 Issue number: ${{ github.event.inputs.issue_number }}
 
-Get the contents of the issue in this repository with this issue number, then analyze the title and body of the opened issue.
+Get the contents of the issue with this issue number in the current repository, then analyze the title and body of the opened issue.
 
 Add zero or more of the allowed labels: `ext-testlib`, `fastmodel`, `gdb`, `github`, `good-first-contribution`, `gpu`, `gpu-compute`, `help wanted`, `learning-gem5`, `mem`, `mem-cache`, `mem-garnet`, `mem-ruby`, `misc`, `python`, `question`, `resources`, `resources-website`, `scons`, `sim`, `sim-se`, `stats`, `stdlib`, `systemc`, `tests`, `util`, `util-docker`, `util-gem5art`, `util-m5`, `website`.
 
