@@ -178,8 +178,7 @@ Leave a comment with the following message, excluding the ---begin markdown form
 
 ## Clang Format Check Failure
 
-The `clang-format-check` on this PR is failing. To fix it, please try the
-following steps:
+The `clang-format-check` on this PR is failing. To fix it, please try the following steps:
 
 1. Run the following command locally:
 
@@ -191,8 +190,7 @@ You can see this command in GitHub by clicking on the failed `clang-format-check
   - either under the `Checks` tab toward the top of the page,
   - or the `Some checks were not successful message` toward the bottom of the page.
 
-2. If running this command locally doesn't make any changes, use the following
-steps: [link](https://github.com/orgs/gem5/discussions/3201#discussioncomment-17242898)
+2. If running this command locally doesn't make any changes, use the following steps: [link](https://github.com/orgs/gem5/discussions/3201#discussioncomment-17242898)
 
 ---end markdown format---
 
