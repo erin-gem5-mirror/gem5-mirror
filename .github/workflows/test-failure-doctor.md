@@ -166,7 +166,13 @@ following pattern: `weekly-tests-run-*/SuiteUID-*/TestUID-*/`.
 If the failure type was not a **Clang format failure**, use the Investigation Issue Template
 to as the template for the comment.
 
-If the failure type was a **Clang format failure**, leave a comment with the following message, excluding the ---begin markdown format--- and ---end markdown format--- dividers:
+If the failure type was a **Clang format failure**, or if there were multiple failure types and one of them was a **Clang format failure**, extract the command that the clang format test runs. The command typically has the following format:
+
+`python util/run-git-clang-format.py --verbose --ci-pr-base-commit <some commit hash>`
+
+where `<some commit hash>` is a commit hash.
+
+Leave a comment with the following message, excluding the ---begin markdown format--- and ---end markdown format--- dividers, and inserting the command that clang format runs where `[INSERT CLANG FORMAT COMMAND]` is written:
 
 ---begin markdown format---
 
@@ -175,25 +181,22 @@ If the failure type was a **Clang format failure**, leave a comment with the fol
 The `clang-format-check` on this PR is failing. To fix it, please try the
 following steps:
 
-1. Get the command that `clang-format-check` uses and run it locally:
+1. Run the following command locally:
 
-   - Click on the failed `clang-format-check` CI Test. This can be found:
-      - either under the `Checks` tab toward the top of the page,
-      - or the `Some checks were not successful message` toward the bottom of the page.
+```bash
+[INSERT CLANG FORMAT COMMAND]
+```
 
-   - The command typically has the following format:
-      ```bash
-      python util/run-git-clang-format.py --verbose --ci-pr-base-commit <hash of the commit before your changes>
-      ```
+You can see this command in GitHub by clicking on the failed `clang-format-check` CI Test. This can be found:
+  - either under the `Checks` tab toward the top of the page,
+  - or the `Some checks were not successful message` toward the bottom of the page.
 
 2. If running this command locally doesn't make any changes, use the following
 steps: [link](https://github.com/orgs/gem5/discussions/3201#discussioncomment-17242898)
 
 ---end markdown format---
 
-If there were other categories of failures aside from the **Clang format failure**,
-make a separate issue for the **Clang format failure**, and group the other failures
-together in one issue.
+If there were failure types other than the clang-format-check, print the message for the clang-format-check first, then report the other test failures in the same comment.
 
 ### Investigation Issue Template (Daily/Weekly/Compiler Tests)
 
