@@ -98,8 +98,11 @@ following pattern: `weekly-tests-run-*/SuiteUID-*/TestUID-*/`.
 
 ### Phase 3: Root Cause Investigation
 
-1. **Categorize Failure Type**:
+1. **Categorize Failure Type(s)**:
    - **Code Issues**: Syntax errors, logic bugs, test failures
+      - **Clang format failure**: This failure is a subset of the
+        **Code Issues** failure type, and occurs specifically when the
+        `clang-format-check` job in the `CI Tests` fails.
    - **Infrastructure**: Runner issues, network problems, resource constraints
    - **Dependencies**: Version conflicts, missing packages, outdated libraries
    - **Configuration**: Workflow configuration, environment variables
@@ -130,7 +133,7 @@ following pattern: `weekly-tests-run-*/SuiteUID-*/TestUID-*/`.
 
 ### Phase 5: Reporting and Recommendations
 
-- Don't run this step if the failure type was **Flaky Tests**, unless the latest run of the triggering workflow was a rerun by the Test Failure Doctor or by a maintainer.
+- Don't run this step if the failure type was **Flaky Tests**.
 
 1. **Create Investigation Report**: Generate a comprehensive analysis including:
    - **Executive Summary**: Quick overview of the failure
@@ -154,10 +157,95 @@ following pattern: `weekly-tests-run-*/SuiteUID-*/TestUID-*/`.
      - If the failure category was **Infrastructure**, do not expose the runner
        name or runner filepaths in the issue.
    - If the failing test was a `CI` Test, leave a comment on the related PR with analysis.
+      - If one of the failure types was **Clang format failure**, leave the following comment
 
 ## Output Requirements
 
-### Investigation Issue Template
+### Investigation Comment Template (CI Tests)
+
+If the failure type was not a **Clang format failure**, use the Investigation Issue Template
+to as the template for the comment.
+
+If the failure type was a **Clang format failure**, leave a comment with the following message, excluding the ---begin markdown format--- and ---end markdown format--- dividers:
+
+---begin markdown format---
+
+# Clang Format Check Failure
+
+The `clang-format-check` on this PR is failing. To fix it, please try the
+following steps:
+
+## Running the Clang format util locally
+
+First, please try running the Clang format utility locally.
+
+To get the command that the `clang-format-check` uses, click on the failed
+`clang-format-check`. This can be found:
+  - either under the `Checks` tab toward the top of the page,
+  - or the `Some checks were not successful message` toward the bottom of the page.
+
+The command typically has the following format, though the hash can sometimes differ:
+
+```bash
+python util/run-git-clang-format.py --verbose --ci-pr-base-commit <hash of the commit before your changes>
+```
+
+If running this command locally doesn't make any changes, use the following
+steps (sourced from [here](https://github.com/orgs/gem5/discussions/3201#discussioncomment-17242898)):
+
+Here's a recipe for how to fix it when you get a clang format error in CI.
+
+https://github.com/gem5/gem5/pull/2861#issuecomment-4653987923
+
+1. Make sure clang format is up to date:
+
+   ```bash
+   pip install clang-format==18.1.8
+   ```
+
+2. Set up an interactive rebase
+
+   ```bash
+   git rebase -i develop
+   ```
+
+and set all commits to `edit`. Then,
+
+3. **Undo the current commit** (keeping all changes in the working tree):
+   ```bash
+   git reset HEAD~1
+   ```
+
+4. **Stage only the files that were part of the original commit**:
+   ```bash
+   git diff --name-only HEAD ORIG_HEAD | xargs git add
+   ```
+   *(This dynamically gets the list of files changed between the parent commit `HEAD` and the original commit `ORIG_HEAD`, and stages only those files).*
+
+5. **Re-commit the changes** (triggering the hooks):
+   ```bash
+   git commit -c ORIG_HEAD
+   ```
+
+6. **Handle pre-commit hook modifications** (if any):
+   If the clang-format hook automatically formats files, stage those formatting updates and commit:
+   ```bash
+   git add -u
+   git commit -c ORIG_HEAD
+   ```
+
+7. **Continue the rebase**:
+   ```bash
+   git rebase --continue
+   ```
+
+---end markdown format---
+
+If there were other categories of failures aside from the **Clang format failure**,
+make a separate issue for the **Clang format failure**, and group the other failures
+together in one issue.
+
+### Investigation Issue Template (Daily/Weekly/Compiler Tests)
 
 When creating an issue, the title should start with the prefix, followed by `Daily Tests Failure - `, `Weekly Tests Failure - `, or `Compiler Tests Failure - `,
 depending on which workflow triggered this Test Failure Doctor run, then a brief summary of the failure.
