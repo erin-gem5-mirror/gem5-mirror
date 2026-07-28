@@ -170,74 +170,24 @@ If the failure type was a **Clang format failure**, leave a comment with the fol
 
 ---begin markdown format---
 
-# Clang Format Check Failure
+## Clang Format Check Failure
 
 The `clang-format-check` on this PR is failing. To fix it, please try the
 following steps:
 
-## Running the Clang format util locally
+1. Get the command that `clang-format-check` uses and run it locally:
 
-First, please try running the Clang format utility locally.
+   - Click on the failed `clang-format-check` CI Test. This can be found:
+      - either under the `Checks` tab toward the top of the page,
+      - or the `Some checks were not successful message` toward the bottom of the page.
 
-To get the command that the `clang-format-check` uses, click on the failed
-`clang-format-check`. This can be found:
-  - either under the `Checks` tab toward the top of the page,
-  - or the `Some checks were not successful message` toward the bottom of the page.
+   - The command typically has the following format:
+      ```bash
+      python util/run-git-clang-format.py --verbose --ci-pr-base-commit <hash of the commit before your changes>
+      ```
 
-The command typically has the following format, though the hash can sometimes differ:
-
-```bash
-python util/run-git-clang-format.py --verbose --ci-pr-base-commit <hash of the commit before your changes>
-```
-
-If running this command locally doesn't make any changes, use the following
-steps (sourced from [here](https://github.com/orgs/gem5/discussions/3201#discussioncomment-17242898)):
-
-Here's a recipe for how to fix it when you get a clang format error in CI.
-
-https://github.com/gem5/gem5/pull/2861#issuecomment-4653987923
-
-1. Make sure clang format is up to date:
-
-   ```bash
-   pip install clang-format==18.1.8
-   ```
-
-2. Set up an interactive rebase
-
-   ```bash
-   git rebase -i develop
-   ```
-
-and set all commits to `edit`. Then,
-
-3. **Undo the current commit** (keeping all changes in the working tree):
-   ```bash
-   git reset HEAD~1
-   ```
-
-4. **Stage only the files that were part of the original commit**:
-   ```bash
-   git diff --name-only HEAD ORIG_HEAD | xargs git add
-   ```
-   *(This dynamically gets the list of files changed between the parent commit `HEAD` and the original commit `ORIG_HEAD`, and stages only those files).*
-
-5. **Re-commit the changes** (triggering the hooks):
-   ```bash
-   git commit -c ORIG_HEAD
-   ```
-
-6. **Handle pre-commit hook modifications** (if any):
-   If the clang-format hook automatically formats files, stage those formatting updates and commit:
-   ```bash
-   git add -u
-   git commit -c ORIG_HEAD
-   ```
-
-7. **Continue the rebase**:
-   ```bash
-   git rebase --continue
-   ```
+2. If running this command locally doesn't make any changes, use the following
+steps: [link](https://github.com/orgs/gem5/discussions/3201#discussioncomment-17242898)
 
 ---end markdown format---
 
