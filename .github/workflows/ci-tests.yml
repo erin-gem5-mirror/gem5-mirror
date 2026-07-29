@@ -281,7 +281,7 @@ jobs:
     #               retention-days: 30
 
     gpu-tests:
-        runs-on: [self-hosted, linux, x64]
+        runs-on: ubuntu-24.04
         container: ghcr.io/gem5/gcn-gpu:latest
         timeout-minutes: 180
         needs: [pre-commit, get-date]
