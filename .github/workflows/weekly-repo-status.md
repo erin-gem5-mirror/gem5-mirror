@@ -82,7 +82,7 @@ This table should be formatted as follows:
 
 In the `Status` column, include *what the last activity was*, *who the last activity was from* and *how long it has been since the last activity*. The GitHub usernames in the `Author` column should link to the authors' GitHub profiles.
 
-- A table of issues, PRs, and discussions that might be high priority.
+- A table of issues, PRs, and discussions that might be high priority. For this table, it is fine to include items that were already listed in previous sections.
   - An issue might be high priority if:
     - several community members have commented on it and said that they have encountered the same issue, especially if the issue causes the simulation to crash or produce inaccurate results.
     - One of the gem5 developers was pinged on the issue. The GitHub usernames of the gem5 developers are `BobbyRBruce`, `Harshil2107`, `erin-le`, and `powerjg`.
