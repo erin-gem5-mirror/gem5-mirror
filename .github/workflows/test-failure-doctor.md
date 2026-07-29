@@ -127,9 +127,9 @@ following pattern: `weekly-tests-run-*/SuiteUID-*/TestUID-*/`.
 
 ### Phase 4: Rerun workflow if necessary
 
-1. If the failure type from the previous step was **Infrastructure** or **Flaky Tests**, rerun the failed tests in the **workflow run that triggered this Test Failure Doctor run** using the rerun-failed-jobs tool.
+1. If the failure type from the previous step was **Flaky Tests**, rerun the failed tests in the **workflow run that triggered this Test Failure Doctor run** using the rerun-failed-jobs tool.
 
-- **Exception**: - If the latest run of the failing workflow was a rerun triggered by a maintainer or by the Test Failure Doctor, *do not* rerun the failing workflow, even if the failure category was **Flaky Tests** or **Infrastructure**.
+- **Exception**: - If the latest run of the failing workflow was a rerun triggered by a maintainer or by the Test Failure Doctor, *do not* rerun the failing workflow, even if the failure category was **Flaky Tests**.
 
 ### Phase 5: Reporting and Recommendations
 
@@ -163,10 +163,9 @@ following pattern: `weekly-tests-run-*/SuiteUID-*/TestUID-*/`.
 
 ### Investigation Comment Template (CI Tests)
 
-If the failure type was not a **Clang format failure**, use the Investigation Issue Template
-to as the template for the comment.
+If the failure type was not a **Clang format failure**, use the `Investigation Issue Template (Daily/Weekly/Compiler Tests)` as the template for the comment.
 
-If the failure type was a **Clang format failure**, or if there were multiple failure types and one of them was a **Clang format failure**, extract the command that the clang format test runs. The command typically has the following format:
+If the failure was a **Clang format failure**, or if there were multiple failure types and one of them was a **Clang format failure**, extract the command that the clang format test runs. The command typically has the following format:
 
 `python util/run-git-clang-format.py --verbose --ci-pr-base-commit <some commit hash>`
 
@@ -196,6 +195,16 @@ You can see this command in GitHub by clicking on the failed `clang-format-check
 
 If there were failure types other than the clang-format-check, print the message for the clang-format-check first, then report the other test failures in the same comment.
 
+When reporting test failures other than the `clang-format-check`, always print the name of the failed job before the analysis in the `Root cause analysis` section. For example, if the `gpu-tests` and `quick-tests (gem5/cpu_tests)` jobs failed, you should format the analysis as follows:
+
+```markdown
+## Root cause analysis
+
+- `gpu-tests`: [analysis of why the gpu-tests failed]
+
+- `quick-tests (gem5/cpu-tests)`: [analysis of why the gem5/cpu-tests failed]
+```
+
 ### Investigation Issue Template (Daily/Weekly/Compiler Tests)
 
 When creating an issue, the title should start with the prefix, followed by `Daily Tests Failure - `, `Weekly Tests Failure - `, or `Compiler Tests Failure - `,
@@ -214,11 +223,14 @@ When creating an investigation issue, use this structure:
 - **Commit**: ${{ github.event.workflow_run.head_sha }}
 - **Trigger**: ${{ github.event.workflow_run.event }}
 
-## Root Cause Analysis
-[Detailed analysis of what went wrong]
-
 ## Failed Jobs and Errors
 [List of failed jobs with key error messages]
+
+## Root Cause Analysis
+[Detailed analysis of what went wrong. Each job that failed should get its own bullet point, and the name of the job should be printed at the start of the bullet point. ]
+
+## Reproduction Steps
+[Commands to reproduce each failed job. Each job should get its own subsection, and each subsection should be labeled according to the job it corresponds to.]
 
 ## Investigation Findings
 [Deep analysis results]
