@@ -46,9 +46,9 @@ engine:
 Create a weekly status report for the gem5/gem5 repo as a GitHub issue.
 When "weekly" or "in the last week" is used, and the workflow was automatically launched (i.e. triggered by scheduler.yaml), it specifically refers to the time since the last automated run of this workflow, if the last automated run was between 1-2 weeks ago. If the last automated run was 2+ weeks ago, or was less than 1 week ago, use the same criteria as below, as if the workflow was launched by a GitHub user.
 
-If this workflow was launched by a GitHub user, you should include all activity starting from **midnight, or the beginning, of the day** that is exactly a week before the workflow was launched.
+If this workflow was launched by a GitHub user, you should include all activity starting from **midnight, or the beginning, of the day** that is exactly a week before the workflow was launched, in the Pacific Time Zone.
 
-For example, if this workflow is run on May 19th at 9am, then the summary should include all activity between May 12th at 12am and May 19th at 9am.
+For example, if this workflow is run on May 19th at 9am PT, then the summary should include all activity between May 12th at 12am PT and May 19th at 9am PT.
 
 - In the section below, the words "item" or "items" refers to PRs, issues, and discussions.
 
