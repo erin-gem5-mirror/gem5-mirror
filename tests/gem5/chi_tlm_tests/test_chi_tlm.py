@@ -1,5 +1,4 @@
-# -*- mode:python -*-
-# Copyright (c) 2024-2026 Arm Limited
+# Copyright (c) 2026 Arm Limited
 # All rights reserved.
 #
 # The license below extends only to copyright in the software and shall
@@ -34,25 +33,34 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Import("*")
+import re
 
-PySource("m5.tlm_chi", "python/__init__.py")
-PySource("m5.tlm_chi", "python/port.py")
-PySource("m5.tlm_chi", "python/utils.py")
-SimObject(
-    "TlmController.py",
-    sim_objects=["TlmController"],
-    tags=['arm isa']
+from testlib import (
+    absdirpath,
+    constants,
+    joinpath,
+    verifier,
 )
-SimObject(
-    'TlmGenerator.py',
-    sim_objects=['TlmGenerator'],
-    tags=['arm isa']
+
+from gem5.suite import gem5_verify_config
+
+gem5_verify_config(
+    name="chi-tlm-read-shared",
+    fixtures=(),
+    verifiers=(),
+    config=joinpath(absdirpath(__file__), "configs", "ruby_mem_test.py"),
+    config_args=[
+        joinpath(
+            absdirpath(__file__),
+            "configs",
+            "suites",
+            "read_shared_unit.py",
+        ),
+        "--abs-max-tick",
+        "1000000",
+    ],
+    valid_isas=(constants.all_compiled_tag,),
+    valid_hosts=constants.supported_hosts,
+    length=constants.quick_tag,
+    protocol="CHI",
 )
-Source("utils.cc", tags=['arm isa'])
-Source("controller.cc", tags=['arm isa'])
-Source('tlm_chi.cc', tags=['arm isa', 'python'])
-Source('tlm_chi_gen.cc', tags=['arm isa', 'python'])
-Source('generator.cc', tags=['arm isa'])
-DebugFlag("TLM", tags=['arm isa'])
-DebugFlag("TLMPort", tags=['arm isa'])
