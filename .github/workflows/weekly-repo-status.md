@@ -91,7 +91,7 @@ In the `Status` column, include *what the last activity was*, *who the last acti
     - One of the gem5 developers has been pushing commits to it. The GitHub usernames of the gem5 developers are as follows: `erin-le`, `Harshil2107`, `BobbyRBruce`, `powerjg`.
     - If the PR has been marked for inclusion in the next release
     - If the PR is a fix for a high priority issue
-    - One of the gem5 developers was pinged on the PR. The GitHub usernames of the gem5 developers are as follows: `erin-le`, `Harshil2107`, `BobbyRBruce`, `powerjg`.
+    - One of the gem5 developers was pinged on the PR, especially if one of the gem5 developers had previously commented on or reviewed the PR. The GitHub usernames of the gem5 developers are as follows: `erin-le`, `Harshil2107`, `BobbyRBruce`, `powerjg`.
 
   - A discussion might be high priority if:
     - several community members have commented on the discussion
