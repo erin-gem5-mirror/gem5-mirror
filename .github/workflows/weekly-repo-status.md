@@ -52,11 +52,13 @@ For example, if this workflow is run on May 19th at 9am PT, then the summary sho
 
 - In the section below, the words "item" or "items" refers to PRs, issues, and discussions.
 
+- In the section below, you will be asked to make tables which will include PR/issue/discussion titles. **Do not** truncate or summarize the titles; print them exactly as they are.
+
 ## What to include
 
 - An executive summary of what has been done in the last week.
 
-- Lists of PRs, issues, and discussions that were opened in the last week, and a short summary of each. This section should use the heading `## Opened in the last week`. Only include items that are still open. PRs, issues, and discussions should be sorted into separate tables, and within each table, items should be sorted from newest to oldest, i.e. by descending PR/issue/discussion number. These tables should be formatted as tables with the PR/issue/discussion number, title, author, and summary. Key words and phrases in the summary should be bolded. Use the table template shown below:
+- Tabless of PRs, issues, and discussions that were opened in the last week, and a short summary of each. This section should use the heading `## Opened in the last week`. Only include items that are still open. PRs, issues, and discussions should be sorted into separate tables, and within each table, items should be sorted from newest to oldest, i.e. by descending PR/issue/discussion number. These tables should be formatted as tables with the PR/issue/discussion number, title, author, and summary. Key words and phrases in the summary should be bolded. Use the table template shown below:
 
 | # | Title | Author | Summary |
 |---|-------|--------|---------|
