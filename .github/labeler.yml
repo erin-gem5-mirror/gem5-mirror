@@ -98,7 +98,7 @@ doc:
 
 mem-dram:
     - changed-files:
-          - any-glob-to-any-file: [src/mem/dram**, src/mem/DRAM**, src/python/gem5/components/memory/dram**] #src/python/gem5/components/memory/dram_interfaces/**,
+          - any-glob-to-any-file: [src/mem/dram**, src/mem/DRAM**, src/python/gem5/components/memory/dram**, src/python/gem5/components/memory/dram_interfaces/**]
 
 ext:
     - changed-files:
