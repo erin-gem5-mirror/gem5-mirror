@@ -79,6 +79,10 @@ dev:
     - changed-files:
           - all-globs-to-any-file: [src/dev/**, '!src/dev/arm/**', '!src/dev/hsa/**', '!src/dev/virtio/**']
 
+dev-amdgpu:
+    - changed-files:
+          - all-globs-to-any-file: src/dev/amdgpu/**
+
 dev-arm:
     - changed-files:
           - any-glob-to-any-file: src/dev/arm/**
@@ -96,6 +100,10 @@ doc:
           - any-glob-to-any-file: [CODE-OF-CONDUCT.md, CONTRIBUTING.md, COPYING, KCONFIG.md, LICENSE, MAINTAINERS.yaml, RELEASE-NOTES.md, TESTING.md]
           - all-globs-to-any-file: ['**/README.md', '!tests/gem5/**/README.md'] # Don't apply the `doc` label for changes to README files for tests
 
+mem-dram:
+    - changed-files:
+          - any-glob-to-any-file: [src/mem/dram**, src/mem/DRAM**, src/python/gem5/components/memory/dram**, src/python/gem5/components/memory/dram_interfaces/**]
+
 ext:
     - changed-files:
           - all-globs-to-any-file: [ext/**, '!ext/testlib/**']
@@ -111,6 +119,10 @@ fastmodel:
 github:
     - changed-files:
           - any-glob-to-any-file: .github/**
+
+gpu:
+    - changed-files:
+          - any-glob-to-any-file: [configs/example/gpufs/**, src/python/gem5/components/devices/gpus/**, src/python/gem5/prebuilt/viper/**]
 
 gpu-compute:
     - changed-files:
@@ -143,6 +155,10 @@ python:
 resources:
     - changed-files:
           - any-glob-to-any-file: src/python/gem5/resources/**
+
+scons:
+    - changed-files:
+          - any-glob-to-any-file: SConstruct
 
 sim:
     - changed-files:
