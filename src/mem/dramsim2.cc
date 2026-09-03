@@ -397,3 +397,5 @@ DRAMSim2::MemoryPort::recvRespRetry()
 
 } // namespace memory
 } // namespace gem5
+
+// make small change for testing
