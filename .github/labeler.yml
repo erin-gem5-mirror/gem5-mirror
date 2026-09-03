@@ -116,6 +116,10 @@ fastmodel:
     - changed-files:
           - any-glob-to-any-file: src/arch/arm/fastmodel/**
 
+gdb:
+    - changed-files:
+          - any-glob-to-any-file: [ext/gdbremote/**, '**/remote_gdb.**']
+
 github:
     - changed-files:
           - any-glob-to-any-file: .github/**
@@ -168,9 +172,19 @@ sim-se:
     - changed-files:
           - any-glob-to-any-file: ['**/se_**.**', '**/syscall**.**', '**/se_binary_workload.py', src/sim/process.**, src/sim/fd_**.**]
 
+# The `stats` label should also be applied manually where relevant, as there
+# can be stats related changes in files that don't match these globs
+stats:
+    - changed-files:
+          - all-globs-to-any-file: ['**/stats/**', '!src/base/stats/**']
+
 stdlib:
     - changed-files:
           - all-globs-to-any-file: [src/python/gem5/**, '!src/python/gem5/resources/**']
+
+system-arm:
+    - changed-files:
+          - all-globs-to-any-file: system/arm/**
 
 systemc:
     - changed-files:
