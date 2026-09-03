@@ -1072,3 +1072,6 @@ for variant_path in variant_paths:
                duplicate=GetOption('duplicate_sources'))
 
 atexit.register(summarize_warnings)
+
+
+# test scons label
