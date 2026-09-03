@@ -121,3 +121,5 @@ if output != expected_output:
     print("Actual:", file=sys.stderr)
     print(json.dumps(output, indent=4), file=sys.stderr)
     sys.exit(1)
+
+# test stats labeling
