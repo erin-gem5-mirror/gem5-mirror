@@ -171,7 +171,7 @@ jobs:
     #           timeout-minutes: 90
 
     testlib-quick-gem5-builds:
-        runs-on: [self-hosted, linux, x64]
+        runs-on: ubuntu-24.04
         if: github.event.pull_request.draft == false
         container: ghcr.io/gem5/ubuntu-24.04_all-dependencies:latest
         needs: [pre-commit, testlib-quick-matrix, get-date]
@@ -216,7 +216,7 @@ jobs:
 
     testlib-quick-execution:
         name: quick-tests
-        runs-on: [self-hosted, linux, x64]
+        runs-on: ubuntu-24.04
         if: github.event.pull_request.draft == false
         container: ghcr.io/gem5/ubuntu-24.04_all-dependencies:latest
         needs: [pre-commit, testlib-quick-matrix, testlib-quick-gem5-builds]
