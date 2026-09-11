@@ -10,7 +10,8 @@ on:
         type: string
 
 concurrency:
-  group: "test-failure-doctor-${{ github.event.inputs.discussion_number }}"
+  group: "discussion-responder"
+  job-discriminator: ${{ github.event.inputs.discussion_number }}
 
 permissions:
   discussions: read
