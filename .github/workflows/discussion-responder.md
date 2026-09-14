@@ -8,6 +8,10 @@ on:
         description: 'Discussion number'
         required: true
         type: string
+      discussion_category:
+        description: 'Discussion category'
+        required: true
+        type: string
 
 permissions:
   discussions: read
