@@ -196,6 +196,13 @@ jobs:
               if: ${{ steps.cache-build-all.outputs.cache-hit != 'true' }}
               run: scons --no-compress-debug ${{ matrix.build-target }} -j $(nproc)
 
+            - name: Save build/ALL cache
+              if: ${{ endsWith(matrix.build-target, 'build/ALL/gem5.opt') && steps.cache-build-all.outputs.cache-hit != 'true' }}
+              uses: actions/cache/save@v4
+              with:
+                  path: build/ALL
+                  key: testlib-build-all
+
             - name: Sanitize build-target for artifact name
               id: sanitize-build-target
               if: success() || failure()
