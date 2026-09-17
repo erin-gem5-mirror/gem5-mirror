@@ -27,6 +27,17 @@ safe-outputs:
   update-issue:
   noop:
   jobs:
+    download-artifact-from-failed-job:
+      description: "Download artifact from failed test to inspect simerr.txt and simout.txt."
+      steps:
+        - name: Download artifact
+          uses: actions/download-artifact@v8
+          # env:
+          with:
+            run-id: ${{ github.event.inputs.failed_workflow_id }}
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+            pattern: "*-status-failure-output"
+
     rerun-failed-jobs:
       permissions:
         actions: write    # this permission is needed to rerun failed jobs
@@ -85,10 +96,10 @@ the `noop` tool.
 
 1. **Retrieve Logs**: Use `get_job_logs` with `failed_only=true` to get logs
 from all failed jobs. Additionally, if the workflow is a CI, Daily, or Weekly
-test, look in the `Upload results` step of the failed job(s) and download the
-artifact. This artifact contains logs for the simulations that the tests run. In
-particular, look for the files named `simerr.txt` and `simout.txt`, which will
-be located under a filepath with the following pattern:
+test, use the `download-artifact-from-failed-job` tool to download the
+relevant artifact(s). This artifact contains logs for the simulations that the
+tests run. In particular, look for the files named `simerr.txt` and
+`simout.txt`, which will be located under a filepath with the following pattern:
 `(ci|daily|weekly)-tests-run-*/SuiteUID-*/TestUID-*/`. Use the contents of the
 `simerr.txt` and `simout.txt` files to help diagnose the problem.
 
