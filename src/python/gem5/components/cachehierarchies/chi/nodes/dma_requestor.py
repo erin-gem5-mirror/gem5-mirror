@@ -25,7 +25,6 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from m5.objects import (
-    CBusyTracker,
     ClockDomain,
     RubyCache,
 )
@@ -78,6 +77,3 @@ class DMARequestor(CacheController):
         self.number_of_DVM_TBEs = 1  # should not receive any dvm
         self.number_of_DVM_snoop_TBEs = 1  # should not receive any dvm
         self.unify_repl_TBEs = False
-
-        self.cbusy_generator = NULL
-        self.cbusy_tracker = CBusyTracker()
