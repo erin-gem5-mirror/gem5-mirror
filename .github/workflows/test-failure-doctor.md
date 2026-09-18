@@ -101,7 +101,10 @@ relevant artifact(s). This artifact contains logs for the simulations that the
 tests run. In particular, look for the files named `simerr.txt` and
 `simout.txt`, which will be located under a filepath with the following pattern:
 `(ci|daily|weekly)-tests-run-*/SuiteUID-*/TestUID-*/`. Use the contents of the
-`simerr.txt` and `simout.txt` files to help diagnose the problem.
+`simerr.txt` and `simout.txt` files to help diagnose the problem. Furthermore,
+print the contents of `simerr.txt` to the investigation issue or comment. If the
+`download-artifact-from-failed-job` tool doesn't download any artifacts, proceed
+with the investigation normally, using the other information available to you.
 
 2. **Pattern Recognition**: Analyze logs for:
    - Error messages and stack traces
