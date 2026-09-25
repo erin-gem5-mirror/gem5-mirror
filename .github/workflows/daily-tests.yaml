@@ -144,7 +144,7 @@ jobs:
               id: run-tests
               timeout-minutes: 1410
               working-directory: ${{ github.workspace }}/tests
-              run: ./main.py run ${{ matrix.test-type }} -j$(nproc) --length=long -vv -t $(nproc) --exclude-tags gcn_gpu
+              run: ./main.py run ${{ matrix.test-type }} -j$(nproc) --length=long -vv -t $(nproc) --exclude-tags gcn_gpu --skip-build
 
             - name: Sanitize test-dir for artifact name
               id: sanitize-test-dir
