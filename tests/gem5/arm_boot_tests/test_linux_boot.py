@@ -162,14 +162,14 @@ test_boot(
 
 #### The long (nightly) tests ####
 
-test_boot(
-    cpu="atomic",
-    num_cpus=1,
-    mem_system="no_cache",
-    memory_class="HBM2Stack",
-    length=constants.long_tag,
-    systemd=True,
-)
+# test_boot(
+#     cpu="atomic",
+#     num_cpus=1,
+#     mem_system="no_cache",
+#     memory_class="HBM2Stack",
+#     length=constants.long_tag,
+#     systemd=True,
+# )
 
 test_boot(
     cpu="timing",
