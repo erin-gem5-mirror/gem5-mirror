@@ -393,3 +393,5 @@ RemoteGDB::checkBpKind(size_t kind)
 }
 
 } // namespace gem5
+
+// test gdb label
