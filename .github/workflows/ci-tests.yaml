@@ -197,9 +197,22 @@ jobs:
         steps:
             - uses: actions/checkout@v7
 
+            - name: Sanitize build-target for artifact name
+              id: sanitize-build-target
+              run: echo "sanitized-build-target=$(echo '${{ matrix.build-target }}' | sed 's/[\\|\.]/-/g' | sed 's/[\/|__w|gem5|build]//g')" >> $GITHUB_OUTPUT
+
+            # If this build was already uploaded (e.g., this is a re-run),
+            # download it and skip the build.
+            - name: Download existing gem5 artifact
+              id: download-existing
+              continue-on-error: true
+              uses: actions/download-artifact@v8
+              with:
+                  name: ci-tests-${{ github.run_number }}-testlib-quick-all-gem5-builds-${{ steps.sanitize-build-target.outputs.sanitized-build-target }}
+
             - name: Cache build/ALL
               uses: actions/cache/restore@v6
-              if: ${{ endsWith(matrix.build-target, 'build/ALL/gem5.opt') }}
+              if: ${{ steps.download-existing.outcome != 'success' && endsWith(matrix.build-target, 'build/ALL/gem5.opt') }}
               with:
                   path: build/ALL
                   key: testlib-binary-build-ALL-${{ needs.get-date.outputs.date }}
@@ -207,12 +220,8 @@ jobs:
                       testlib-binary-build-ALL-
 
             - name: Build gem5
+              if: steps.download-existing.outcome != 'success'
               run: scons ${{ matrix.build-target }} -j $(nproc)
-
-            - name: Sanitize build-target for artifact name
-              id: sanitize-build-target
-              if: success() || failure()
-              run: echo "sanitized-build-target=$(echo '${{ matrix.build-target }}' | sed 's/[\\|\.]/-/g' | sed 's/[\/|__w|gem5|build]//g')" >> $GITHUB_OUTPUT
 
         # Upload the gem5 binary as an artifact.
         # Note: the "achor.txt" file is a hack to make sure the paths are
@@ -223,7 +232,9 @@ jobs:
         # stripping the "build" directory. By adding the "anchor.txt" file, we
         # ensure the "build" directory is preserved.
             - run: echo "anchor" > anchor.txt
+              if: steps.download-existing.outcome != 'success'
             - uses: actions/upload-artifact@v7
+              if: steps.download-existing.outcome != 'success'
               with:
                   name: ci-tests-${{ github.run_number }}-testlib-quick-all-gem5-builds-${{ steps.sanitize-build-target.outputs.sanitized-build-target }}
                   path: |
