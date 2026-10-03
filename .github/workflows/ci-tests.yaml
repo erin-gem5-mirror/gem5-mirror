@@ -208,7 +208,8 @@ jobs:
               continue-on-error: true
               uses: actions/download-artifact@v8
               with:
-                  name: ci-tests-${{ github.run_number }}-testlib-quick-all-gem5-builds-${{ steps.sanitize-build-target.outputs.sanitized-build-target }}
+                  name: ci-tests-${{ github.event.pull_request.number }}-testlib-quick-all-gem5-builds-${{ steps.sanitize-build-target.outputs.sanitized-build-target
+                      }}
 
             - name: Cache build/ALL
               uses: actions/cache/restore@v6
@@ -236,7 +237,8 @@ jobs:
             - uses: actions/upload-artifact@v7
               if: steps.download-existing.outcome != 'success'
               with:
-                  name: ci-tests-${{ github.run_number }}-testlib-quick-all-gem5-builds-${{ steps.sanitize-build-target.outputs.sanitized-build-target }}
+                  name: ci-tests-${{ github.event.pull_request.number }}-testlib-quick-all-gem5-builds-${{ steps.sanitize-build-target.outputs.sanitized-build-target
+                      }}
                   path: |
                       build/*/gem5.*
                       anchor.txt
@@ -258,7 +260,7 @@ jobs:
             - uses: actions/download-artifact@v8
               name: Download gem5 artifacts
               with:
-                  pattern: ci-tests-${{ github.run_number }}-testlib-quick-all-gem5-builds*
+                  pattern: ci-tests-${{ github.event.pull_request.number }}-testlib-quick-all-gem5-builds*
                   merge-multiple: true
 
         # Check that the gem5.opt artifact exists and is executable.
