@@ -120,7 +120,7 @@ jobs:
   # start running all of the long tests
     testlib-long-tests:
         name: long-tests
-        runs-on: ubuntu-24.04
+        runs-on: self-hosted
         container: ghcr.io/gem5/ubuntu-24.04_all-dependencies:latest
         timeout-minutes: 1440 # 24 hours for entire matrix to run
         needs:
