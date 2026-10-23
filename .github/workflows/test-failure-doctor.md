@@ -134,7 +134,7 @@ be located under a filepath with the following pattern:
 
 ### Phase 4: Rerun workflow if necessary
 
-1. If the failure type from the previous step was **Flaky Tests**, rerun the failed tests in the **workflow run that triggered this Test Failure Doctor run** using the rerun-failed-jobs tool.
+1. If the failure type from the previous step was **Flaky Tests** or **Infrastructure**, rerun the failed tests in the **workflow run that triggered this Test Failure Doctor run** using the rerun-failed-jobs tool.
 
 - **Exception**: - If the latest run of the failing workflow was a rerun triggered by a maintainer or by the Test Failure Doctor, *do not* rerun the failing workflow, even if the failure category was **Flaky Tests**.
 
