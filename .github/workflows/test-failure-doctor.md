@@ -138,6 +138,8 @@ be located under a filepath with the following pattern:
 
 - **Exception**: - If the latest run of the failing workflow was a rerun triggered by a maintainer or by the Test Failure Doctor, *do not* rerun the failing workflow, even if the failure category was **Flaky Tests**.
 
+If you choose not to rerun the workflow, write the reason to the Agentic Conversation.
+
 ### Phase 5: Reporting and Recommendations
 
 - Don't run this step if the failure type was **Flaky Tests**.
