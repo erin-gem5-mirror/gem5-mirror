@@ -138,7 +138,7 @@ be located under a filepath with the following pattern:
 
 - **Exception**: - If the latest run of the failing workflow was a rerun triggered by a maintainer or by the Test Failure Doctor, *do not* rerun the failing workflow, even if the failure category was **Flaky Tests**.
 
-If you choose not to rerun the workflow, write the reason to the Agentic Conversation.
+If you choose not to rerun the workflow, clearly explain the reason in the issue, issue comment, or PR comment, alongside the failure report.
 
 ### Phase 5: Reporting and Recommendations
 
