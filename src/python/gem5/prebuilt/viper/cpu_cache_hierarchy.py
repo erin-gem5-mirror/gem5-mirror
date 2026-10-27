@@ -297,3 +297,6 @@ class ViperCPUCacheHierarchy(AbstractRubyCacheHierarchy):
             ruby_system=self.ruby_system
         )
         board.connect_system_port(self.ruby_system.sys_port_proxy.in_ports)
+
+
+# test gpu label
