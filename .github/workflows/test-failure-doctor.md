@@ -136,7 +136,8 @@ be located under a filepath with the following pattern:
 
 1. If the failure type from the previous step was **Flaky Tests** or **Infrastructure**, rerun the failed tests in the **workflow run that triggered this Test Failure Doctor run** using the rerun-failed-jobs tool.
 
-- **Exception**: - If the latest run of the failing workflow was a rerun triggered by a maintainer or by the Test Failure Doctor, *do not* rerun the failing workflow, even if the failure category was **Flaky Tests**.
+- **Exception**: - If the latest run of the failing workflow was a rerun triggered by a maintainer or by the Test Failure Doctor, *do not* rerun the failing workflow, unless the failure category was **Flaky Tests**. Check who reran the workflow using the value of `github.event.workflow_run.triggering_actor.login` in the specific failing workflow. Do not inspect other workflows in the repository
+when checking this.
 
 If you choose not to rerun the workflow, clearly explain the reason in the issue, issue comment, or PR comment, alongside the failure report.
 
