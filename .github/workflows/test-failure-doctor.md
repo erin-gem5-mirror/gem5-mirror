@@ -13,6 +13,7 @@ on:
 
 concurrency:
   group: "test-failure-doctor-${{ github.event.inputs.failed_workflow_id }}"
+  job-discriminator: "test-failure-doctor-${{ github.event.inputs.failed_workflow_id }}"
 
 permissions: read-all
 
@@ -21,9 +22,15 @@ network: defaults
 safe-outputs:
   create-issue:
     title-prefix: "misc: [Test Failure Doctor] "
+    labels: [misc, agentic-workflows]
   add-comment:
+  create-pull-request-review-comment:
+    max: 10
+    target: "*"
   update-issue:
   noop:
+    report-as-issue: false
+  report-failure-as-issue: false
   jobs:
     rerun-failed-jobs:
       permissions:
@@ -60,6 +67,15 @@ engine:
     COPILOT_MODEL: gpt-5.6-terra
     COPILOT_PROVIDER_API_KEY: ${{ secrets.COPILOT_PROVIDER_API_KEY }}
 
+pre-agent-steps:
+  - name: Download failed-test artifacts
+    uses: actions/download-artifact@v8
+    with:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      path: /tmp/gh-aw/failure-artifacts
+      pattern: "*-status-failure-output"
+      run-id: ${{ github.event.inputs.failed_workflow_id }}
+
 ---
 # Test Failure Doctor
 
@@ -83,11 +99,14 @@ the `noop` tool.
 
 1. **Retrieve Logs**: Use `get_job_logs` with `failed_only=true` to get logs
 from all failed jobs. Additionally, if the workflow is a CI, Daily, or Weekly
-test, look in the `Upload results` step of the failed job(s) and download the
-artifact. This artifact contains logs for the simulations that the tests run. In
-particular, look for the files named `simerr.txt` and `simout.txt`, which will
-be located under a filepath with the following pattern:
-`(ci|daily|weekly)-tests-run-*/SuiteUID-*/TestUID-*/`.
+test, inspect the relevant pre-downloaded artifact(s) under
+`/tmp/gh-aw/failure-artifacts`. These artifacts contain logs for the simulations
+that the tests run. In particular, look for the files named `simerr.txt` and
+`simout.txt`, which will be located under a filepath with the following pattern:
+`/tmp/gh-aw/failure-artifacts/(ci|daily|weekly)-tests-run-*-status-failure-output/SuiteUID-*/TestUID-*/`.
+Use the contents of the `simerr.txt` and `simout.txt` files to help diagnose the
+problem. If no artifacts are present, proceed with the investigation normally,
+using the other information available to you.
 
 2. **Pattern Recognition**: Analyze logs for:
    - Error messages and stack traces
@@ -134,12 +153,9 @@ be located under a filepath with the following pattern:
 
 ### Phase 4: Rerun workflow if necessary
 
-1. If the failure type from the previous step was **Flaky Tests** or **Infrastructure**, rerun the unsuccessful jobs in the **workflow run that triggered this Test Failure Doctor run** using the rerun-failed-jobs tool.
+1. If the failure type from the previous step was **Flaky Tests**, rerun the failed tests in the **workflow run that triggered this Test Failure Doctor run** using the rerun-failed-jobs tool.
 
-- **Exception**: - If the latest run of the failing workflow was a rerun triggered by a maintainer or by the Test Failure Doctor, *do not* rerun the failing workflow, unless the failure category was **Flaky Tests**. Check who reran the workflow using the value of `github.triggering_actor` in the specific failing workflow. Do not inspect other workflows in the repository
-when checking this.
-
-If you choose not to rerun the workflow, clearly explain the reason in the issue, issue comment, or PR comment, alongside the failure report.
+- **Exception**: - If the latest run of the failing workflow was a rerun triggered by a maintainer or by the Test Failure Doctor, *do not* rerun the failing workflow, even if the failure category was **Flaky Tests**.
 
 ### Phase 5: Reporting and Recommendations
 
@@ -166,8 +182,18 @@ If you choose not to rerun the workflow, clearly explain the reason in the issue
      - If the failure category was **Flaky Tests**, *do not* open an issue.
      - If the failure category was **Infrastructure**, do not expose the runner
        name or runner filepaths in the issue.
-   - If the failing test was a `CI` Test, leave a comment on the related PR with analysis.
-      - If one of the failure types was **Clang format failure**, leave the following comment
+   - If the failing test was a `CI` Test, leave review comment(s) on the related PR with analysis.
+      - If there are multiple failing tests, split up the review comments/ failure analysis **by test**
+      and anchor them to the relevant lines or file that caused the failure.
+      - If there aren't any particular line(s) changed or file(s) that a test
+      failure is related to, or if you can't identify which line(s) or files(s)
+      a failure is caused by, anchor the review comment to the first file shown
+      in the `Files changed` tab on GitHub, and leave the following message at
+      the top of the review comment, below the title:
+      `Note: This comment is meant for the entire PR and is not related to only this file.`
+        - If there are multiple test failures not related to/ not identifiably
+        related to a line or file, consolidate the analysis into one review comment.
+      - If one of the failure types was **Clang format failure**, leave the following comment:
 
 ## Output Requirements
 
