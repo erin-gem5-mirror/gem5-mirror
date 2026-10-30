@@ -1,19 +1,20 @@
 ---
 description: Investigates failed test workflows to identify root causes and patterns and rerun if the failure isn't related to the code
+run-name: "Test Failure Doctor (${{ github.event.inputs.failed_workflow_id && format('single run {0}', github.event.inputs.failed_workflow_id) || 'batch' }})"
 on:
   workflow_dispatch:
     inputs:
       failed_workflow_id:
         description: 'Workflow ID for the workflow that originally triggered the test failure doctor'
-        required: true
+        required: false
         type: string
 
   bots: ["github-actions[bot]"]
   roles: all
 
 concurrency:
-  group: "test-failure-doctor-${{ github.event.inputs.failed_workflow_id }}"
-  job-discriminator: "test-failure-doctor-${{ github.event.inputs.failed_workflow_id }}"
+  group: "test-failure-doctor-${{ github.event.inputs.failed_workflow_id || github.run_id}}"
+  job-discriminator: "test-failure-doctor-${{ github.event.inputs.failed_workflow_id || github.run_id}}"
 
 permissions: read-all
 
@@ -83,16 +84,49 @@ You are the Test Failure Doctor, an expert investigative agent that analyzes fai
 
 ## Investigation Protocol
 
-Look at the workflow run id passed through "${{ github.event.inputs.failed_workflow_id }}", and run the following procedure to diagnose the issues that occurred in the workflow run that **corresponds to "${{ github.event.inputs.failed_workflow_id }}" **.
-Take the specified actions where necessary. If no actions are needed, call
-the `noop` tool.
+If "${{ github.event.inputs.failed_workflow_id }}" is set, investigate that
+workflow run. Otherwise, find the batch of eligible test workflow runs that
+finished since the previous completed batch run of the Test Failure Doctor, and
+investigate every run in the batch using the procedure below. If no actions are
+needed for the batch, call the `noop` tool.
+
+### Selecting Runs for a Batch
+
+1. Use `list_workflow_runs` to find the most recent **completed** run of this
+   Test Failure Doctor workflow before the current run **that ran on a
+   batch**. Batch runs have a `display_title` of
+   `Test Failure Doctor (batch)`. Skip every run whose `display_title` starts
+   with `Test Failure Doctor (single run`, since those were dispatched with a
+   `failed_workflow_id` and investigated only one workflow run. Never use a
+   single-run execution to set the batch start time. Use the selected batch
+   run's `created_at` as the batch start time, and do not use the current run
+   as the previous run.
+2. Use `list_workflow_runs` to find all runs for the `Daily Tests`,
+   `Weekly Tests`, `Compiler Tests`, and `CI Tests` workflows. Include a run
+   only when its `updated_at` (the completion time for a completed run) is
+   later than the batch start time, its status is `completed`, its conclusion
+   is `failure`, `timed_out`, or `cancelled`, and `run_attempt` is exactly
+   `1`. These are the same workflow names and failure filters used by
+   `run-test-failure-doctor.yaml`.
+3. If there is no previous completed batch run, use the
+   two-hour interval immediately preceding the current run's `created_at` as
+   the batch start time. This bounds the initial scan to one scheduler
+   interval.
+4. Paginate run listings as needed so the batch is complete. Deduplicate by
+   workflow run ID, then process each selected run independently through
+   Phases 1–5. Use the selected run's details and ID wherever the report
+   templates below refer to the failed workflow; do not rely on
+   `github.event.workflow_run`, which is not set for a scheduled batch.
+5. If no runs meet these criteria, call `noop` and exit.
 
 ### Phase 1: Initial Triage
 
-0. Print the value of "${{ github.event.inputs.failed_workflow_id }}" to the Agentic Conversation. If this is empty, **call noop immediately** and exit.
+0. Print the selected workflow run ID to the Agentic Conversation.
 
-1. **Get Workflow Details**: Use `get_workflow_run` to get full details of the failed run. Use "${{ github.event.inputs.failed_workflow_id }}" as the `resource_id` in this call.
-2. **List Jobs**: Use `list_workflow_jobs` to identify which specific jobs failed. Use "${{ github.event.inputs.failed_workflow_id }}" for the `resource_id` in this call.
+1. **Get Workflow Details**: Use `get_workflow_run` to get full details of
+   the selected run. Use its ID as the `resource_id` in this call.
+2. **List Jobs**: Use `list_workflow_jobs` to identify which specific jobs
+   failed. Use the selected run's ID as the `resource_id` in this call.
 3. **Quick Assessment**: Determine if this is a new type of failure or a recurring pattern
 
 ### Phase 2: Deep Log Analysis
@@ -153,7 +187,14 @@ using the other information available to you.
 
 ### Phase 4: Rerun workflow if necessary
 
-1. If the failure type from the previous step was **Flaky Tests**, rerun the failed tests in the **workflow run that triggered this Test Failure Doctor run** using the rerun-failed-jobs tool.
+1. If the failure type from the previous step was **Flaky Tests** or
+   **Infrastructure**, rerun the unsuccessful jobs in the selected workflow
+   run using the rerun-failed-jobs tool when this doctor run was dispatched
+   with that run's `failed_workflow_id`.
+
+   For a scheduled batch, the rerun-failed-jobs action is bound to the
+   single-run dispatch input and cannot target a selected batch run. Do not
+   invoke it in batch mode; report whether a rerun is recommended and why.
 
 - **Exception**: - If the latest run of the failing workflow was a rerun triggered by a maintainer or by the Test Failure Doctor, *do not* rerun the failing workflow, even if the failure category was **Flaky Tests**.
 
@@ -249,15 +290,15 @@ depending on which workflow triggered this Test Failure Doctor run, then a brief
 When creating an investigation issue, use this structure:
 
 ```markdown
-# Test Failure Investigation - Run #${{ github.event.workflow_run.run_number }}
+# Test Failure Investigation - Run #[selected run number]
 
 ## Summary
 [Brief description of the failure]
 
 ## Failure Details
-- **Run**: [${{ github.event.workflow_run.id }}](${{ github.event.workflow_run.html_url }})
-- **Commit**: ${{ github.event.workflow_run.head_sha }}
-- **Trigger**: ${{ github.event.workflow_run.event }}
+- **Run**: [selected run ID](selected run URL)
+- **Commit**: selected run head SHA
+- **Trigger**: selected run event
 
 ## Failed Jobs and Errors
 [List of failed jobs with key error messages]
