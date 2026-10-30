@@ -13,8 +13,8 @@ on:
   roles: all
 
 concurrency:
-  group: "test-failure-doctor-${{ github.event.inputs.failed_workflow_id || github.run_id}}"
-  job-discriminator: "test-failure-doctor-${{ github.event.inputs.failed_workflow_id || github.run_id}}"
+  group: "test-failure-doctor-${{ github.event.inputs.failed_workflow_id || github.run_id }}"
+  job-discriminator: "test-failure-doctor-${{ github.event.inputs.failed_workflow_id || github.run_id }}"
 
 permissions: read-all
 
