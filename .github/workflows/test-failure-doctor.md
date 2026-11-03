@@ -36,19 +36,32 @@ safe-outputs:
     rerun-failed-jobs:
       permissions:
         actions: write    # this permission is needed to rerun failed jobs
-      description: "Rerun failed jobs for a given workflow run ID."
+      description: "Rerun failed jobs for a list of workflow run IDs. This tool can only be called once, so pass every run to rerun in a single call."
+      inputs:
+        run_ids:
+          description: "Comma-separated IDs of the workflow runs whose failed jobs should be rerun."
+          required: true
+          type: string
       steps:
         - name: Rerun failed jobs
           uses: actions/github-script@v9
           env:
-            RUN_ID: ${{ github.event.inputs.failed_workflow_id }}
+            GH_AW_AGENT_OUTPUT: ${{ runner.temp }}/gh-aw/safe-jobs/agent_output.json
           with:
              script: |
-                await github.rest.actions.reRunWorkflowFailedJobs({
-                   owner: context.repo.owner,
-                   repo: context.repo.repo,
-                   run_id: parseInt(process.env.RUN_ID, 10)
-                });
+                const output = JSON.parse(
+                    require('fs').readFileSync(
+                        process.env.GH_AW_AGENT_OUTPUT, 'utf8'));
+                const item = output.items.find(
+                    (i) => i.type === 'rerun_failed_jobs');
+                const runIds = item.run_ids.split(',').map((id) => id.trim());
+                for (const runId of runIds) {
+                    await github.rest.actions.reRunWorkflowFailedJobs({
+                       owner: context.repo.owner,
+                       repo: context.repo.repo,
+                       run_id: parseInt(runId, 10)
+                    });
+                }
 
 tools:
   github:
@@ -84,9 +97,9 @@ You are the Test Failure Doctor, an expert investigative agent that analyzes fai
 
 ## Investigation Protocol
 
-If "${{ github.event.inputs.failed_workflow_id }}" is set, investigate that
-workflow run. Otherwise, find the batch of eligible test workflow runs that
-finished since the previous completed batch run of the Test Failure Doctor, and
+If the `github.event.inputs.failed_workflow_id`="${{ github.event.inputs.failed_workflow_id }}" is set,
+investigate that workflow run. Otherwise, find the batch of eligible test workflow
+runs that finished since the previous completed batch run of the Test Failure Doctor, and
 investigate every run in the batch using the procedure below. If no actions are
 needed for the batch, call the `noop` tool.
 
@@ -96,7 +109,7 @@ needed for the batch, call the `noop` tool.
    Test Failure Doctor workflow before the current run **that ran on a
    batch**. Batch runs have a `display_title` of
    `Test Failure Doctor (batch)`. Skip every run whose `display_title` starts
-   with `Test Failure Doctor (single run`, since those were dispatched with a
+   with `Test Failure Doctor (single run)`, since those were dispatched with a
    `failed_workflow_id` and investigated only one workflow run. Never use a
    single-run execution to set the batch start time. Use the selected batch
    run's `created_at` as the batch start time, and do not use the current run
@@ -105,13 +118,15 @@ needed for the batch, call the `noop` tool.
    `Weekly Tests`, `Compiler Tests`, and `CI Tests` workflows. Include a run
    only when its `updated_at` (the completion time for a completed run) is
    later than the batch start time, its status is `completed`, its conclusion
-   is `failure`, `timed_out`, or `cancelled`, and `run_attempt` is exactly
-   `1`. These are the same workflow names and failure filters used by
-   `run-test-failure-doctor.yaml`.
-3. If there is no previous completed batch run, use the
+   is `failure`, `timed_out`, or `cancelled`, and `run_attempt` is `1` or `2`.
+   Furthermore, exclude any workflow runs that have already been analyzed
+   by the Test Failure Doctor.
+3. If there is no previous completed batch run, or if the most recent
+   previously completed batch run was over 24 hours ago, use the
    two-hour interval immediately preceding the current run's `created_at` as
    the batch start time. This bounds the initial scan to one scheduler
-   interval.
+   interval, and prevents Test Failure Doctor from processing an excessive
+   number of workflows in case of a pause or outage.
 4. Paginate run listings as needed so the batch is complete. Deduplicate by
    workflow run ID, then process each selected run independently through
    Phases 1–5. Use the selected run's details and ID wherever the report
@@ -188,15 +203,21 @@ using the other information available to you.
 ### Phase 4: Rerun workflow if necessary
 
 1. If the failure type from the previous step was **Flaky Tests** or
-   **Infrastructure**, rerun the unsuccessful jobs in the selected workflow
-   run using the rerun-failed-jobs tool when this doctor run was dispatched
-   with that run's `failed_workflow_id`.
+   **Infrastructure**, the unsuccessful jobs in the selected workflow run
+   should be rerun.
+   - **Exception**: - If the latest run of the failing workflow was a rerun
+   triggered by a maintainer or by the Test Failure Doctor, *do not* rerun the
+   failing workflow, even if the failure category was **Flaky Tests**.
 
-   For a scheduled batch, the rerun-failed-jobs action is bound to the
-   single-run dispatch input and cannot target a selected batch run. Do not
-   invoke it in batch mode; report whether a rerun is recommended and why.
+   The rerun-failed-jobs tool can only be called **once** per Test Failure
+   Doctor run. Do not call it while investigating individual runs. Instead,
+   keep a list of the IDs of every selected run that meets the rerun criteria
+   (including the exception below). After all runs have been investigated,
+   call the rerun-failed-jobs tool a single time, passing the list as a
+   comma-separated string in `run_ids` (for example `123,456`). For a
+   single-run dispatch the list contains only that run's ID. If the list is
+   empty, do not call the tool.
 
-- **Exception**: - If the latest run of the failing workflow was a rerun triggered by a maintainer or by the Test Failure Doctor, *do not* rerun the failing workflow, even if the failure category was **Flaky Tests**.
 
 ### Phase 5: Reporting and Recommendations
 
