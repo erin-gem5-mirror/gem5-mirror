@@ -161,3 +161,5 @@ std::unique_ptr<Output> initHDF5(
 } // namespace gem5
 
 #endif // __BASE_STATS_HDF5_HH__
+
+// test stats and base-stats labeling
