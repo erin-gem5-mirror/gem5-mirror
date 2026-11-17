@@ -188,3 +188,6 @@ def SingleChannelHBM(size: str | None = "64MiB") -> SingleChannel:
     :param size: The size of the memory system. Default value of 64MiB.
     """
     return SingleChannel("HBM1_4Gb_x128", size)
+
+
+# make small change for testing src/python/gem5/components/memory/dram**
